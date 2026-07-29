@@ -73,28 +73,58 @@ function checkForUpdates(callback) {
 
 // ─── Webhook endpoint ──────────────────────────────────────
 app.post('/webhook', (req, res) => {
+    // Log ALL headers and body for debugging
+    log(`📨 Webhook received!`);
+    log(`📋 Headers: ${JSON.stringify(req.headers, null, 2)}`);
+    log(`📦 Body: ${JSON.stringify(req.body, null, 2)}`);
+    
+    // Check if it's a GitHub webhook
+    const githubEvent = req.headers['x-github-event'];
+    if (!githubEvent) {
+        log('⚠️ Not a GitHub webhook (missing x-github-event header)');
+        return res.status(200).json({ message: 'Not a GitHub event' });
+    }
+    
     // Verify GitHub signature (optional but recommended)
     const signature = req.headers['x-hub-signature-256'];
     if (SECRET && SECRET !== 'your-secret-here') {
-        const hmac = crypto.createHmac('sha256', SECRET);
-        const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
-        if (signature !== digest) {
-            log('❌ Invalid webhook signature');
-            return res.status(401).json({ error: 'Invalid signature' });
+        try {
+            const hmac = crypto.createHmac('sha256', SECRET);
+            const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
+            if (signature !== digest) {
+                log(`❌ Invalid webhook signature`);
+                log(`   Expected: ${digest}`);
+                log(`   Received: ${signature}`);
+                return res.status(401).json({ error: 'Invalid signature' });
+            }
+            log('✅ Signature verified');
+        } catch (error) {
+            log(`❌ Signature verification failed: ${error.message}`);
+            return res.status(401).json({ error: 'Signature verification error' });
         }
     }
     
-    if (req.headers['x-github-event'] === 'push') {
-        log(`📦 Webhook: Push event received from ${req.body.repository?.full_name || 'unknown'}`);
-        deploy((success) => {
-            if (success) {
-                res.status(200).json({ message: 'Deployment started successfully' });
-            } else {
-                res.status(500).json({ error: 'Deployment failed' });
-            }
-        });
+    if (githubEvent === 'push') {
+        const repoName = req.body.repository?.full_name || 'unknown';
+        const branch = req.body.ref || 'unknown';
+        log(`📦 Push event received from ${repoName} on branch ${branch}`);
+        
+        // Check if it's the main branch
+        if (branch === 'refs/heads/main' || branch === 'refs/heads/master') {
+            deploy((success) => {
+                if (success) {
+                    res.status(200).json({ message: 'Deployment started successfully' });
+                } else {
+                    res.status(500).json({ error: 'Deployment failed' });
+                }
+            });
+        } else {
+            log(`⏭️ Ignoring push to ${branch} (not main/master)`);
+            res.status(200).json({ message: `Ignoring push to ${branch}` });
+        }
     } else {
-        res.status(200).json({ message: 'OK' });
+        log(`ℹ️ Received ${githubEvent} event (ignoring)`);
+        res.status(200).json({ message: `OK - ${githubEvent}` });
     }
 });
 
