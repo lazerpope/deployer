@@ -86,23 +86,23 @@ app.post('/webhook', (req, res) => {
     }
     
     // Verify GitHub signature (optional but recommended)
-    const signature = req.headers['x-hub-signature-256'];
-    if (SECRET && SECRET !== 'your-secret-here') {
-        try {
-            const hmac = crypto.createHmac('sha256', SECRET);
-            const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
-            if (signature !== digest) {
-                log(`❌ Invalid webhook signature`);
-                log(`   Expected: ${digest}`);
-                log(`   Received: ${signature}`);
-                return res.status(401).json({ error: 'Invalid signature' });
-            }
-            log('✅ Signature verified');
-        } catch (error) {
-            log(`❌ Signature verification failed: ${error.message}`);
-            return res.status(401).json({ error: 'Signature verification error' });
-        }
-    }
+    // const signature = req.headers['x-hub-signature-256'];
+    // if (SECRET && SECRET !== 'your-secret-here') {
+    //     try {
+    //         const hmac = crypto.createHmac('sha256', SECRET);
+    //         const digest = 'sha256=' + hmac.update(JSON.stringify(req.body)).digest('hex');
+    //         if (signature !== digest) {
+    //             log(`❌ Invalid webhook signature`);
+    //             log(`   Expected: ${digest}`);
+    //             log(`   Received: ${signature}`);
+    //             return res.status(401).json({ error: 'Invalid signature' });
+    //         }
+    //         log('✅ Signature verified');
+    //     } catch (error) {
+    //         log(`❌ Signature verification failed: ${error.message}`);
+    //         return res.status(401).json({ error: 'Signature verification error' });
+    //     }
+    // }
     
     if (githubEvent === 'push') {
         const repoName = req.body.repository?.full_name || 'unknown';
