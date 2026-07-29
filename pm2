@@ -1,0 +1,3 @@
+pm2 start npm --name "deployer" --cron-restart="0 * * * *" -- run start
+
+
