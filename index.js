@@ -29,7 +29,7 @@ function deploy(callback) {
     const commands = [
         `cd ${APP_DIR}`,
         'echo "📦 Pulling latest changes..."',
-        `git pull origin ${BRANCH}`,
+        `git pull`,
         'echo "🔨 Building Docker images..."',
         'docker compose build --no-cache',
         'echo "▶️ Starting containers..."',
