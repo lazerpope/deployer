@@ -29,10 +29,10 @@ function deploy(callback) {
     const commands = [
         `cd ${APP_DIR}`,
         'git pull origin main',
-        'docker compose up -d --build',
-        'docker system prune -f'
-    ].join(' && ');
 
+    ].join(' && ');
+        // 'docker compose up -d --build',
+        // 'docker system prune -f'
     exec(commands, (error, stdout, stderr) => {
         if (error) {
             log(`❌ Deployment failed: ${error.message}`);
