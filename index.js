@@ -3,7 +3,8 @@ import { exec, execSync } from 'child_process';
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 app.use(express.json());
