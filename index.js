@@ -7,8 +7,8 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.WEBHOOK_PORT || 3000;
-const SECRET = process.env.WEBHOOK_SECRET || 'your-secret-here';
-const APP_DIR = '/home/nitpo/app';
+const SECRET = process.env.WEBHOOK_SECRET ;
+const APP_DIR =  process.env.APP_DIR;
 const LOG_FILE = '/home/nitpo/app/webhook.log';
 
 // ─── Logging ──────────────────────────────────────────────
